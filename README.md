@@ -2,7 +2,6 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_2yaml.svg)](https://pub.dev/packages/flutter_2yaml)
 [![pub points](https://img.shields.io/pub/points/flutter_2yaml)](https://pub.dev/packages/flutter_2yaml/score)
-[![CI](https://github.com/msi-shamim/flutter_2yaml/actions/workflows/ci.yml/badge.svg)](https://github.com/msi-shamim/flutter_2yaml/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Dart 3](https://img.shields.io/badge/Dart-3.8+-00B4AB.svg?logo=dart)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://pub.dev/packages/flutter_2yaml)
