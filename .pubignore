@@ -1,0 +1,4 @@
+# Exclude test fixtures from published package.
+# These are sample Flutter .dart files used for testing the parser
+# and contain imports that aren't in this package's dependencies.
+test/fixtures/

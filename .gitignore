@@ -1,0 +1,39 @@
+# Dart related
+.dart_tool/
+.packages
+.pub/
+build/
+pubspec.lock
+
+# IDE related
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS related
+.DS_Store
+Thumbs.db
+
+# Test related
+coverage/
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+*.swp
+
+# Documentation (generated)
+doc/api/
+
+# Example build artifacts
+/example/.dart_tool/
+/example/.packages
+/example/build/
+/example/pubspec.lock
+
+# Env
+.env
+.env.*

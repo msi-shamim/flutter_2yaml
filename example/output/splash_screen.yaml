@@ -1,0 +1,17 @@
+page: SplashScreen
+type: StatefulWidget
+state: [_isLoading: bool = true]
+lifecycle:
+  initState: [Future.delayed(3s)]
+  dispose: []
+build:
+  Scaffold:
+    bg: white
+    body:
+      Center:
+        child:
+          Column(center):
+            children:
+              - Image.asset: assets/logo.png | 200x200
+              - SizedBox: { h: 20 }
+              - if _isLoading: CircularProgressIndicator: { color: blue }

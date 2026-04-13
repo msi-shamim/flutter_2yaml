@@ -1,0 +1,31 @@
+name: flutter_2yaml
+description: >-
+  Convert Flutter .dart widget files into compact YAML representations
+  optimized for LLM/AI token consumption. Supports bidirectional conversion
+  with pipe syntax, CSS-like shorthands, and arrow callback notation.
+version: 0.4.0
+homepage: https://github.com/msi-shamim/flutter_2yaml
+repository: https://github.com/msi-shamim/flutter_2yaml
+issue_tracker: https://github.com/msi-shamim/flutter_2yaml/issues
+license: MIT
+
+platforms:
+  linux:
+  macos:
+  windows:
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  analyzer: ^7.4.5
+  args: ^2.7.0
+  path: ^1.9.1
+  watcher: ^1.1.1
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0
+
+executables:
+  flutter_2yaml: flutter_2yaml
