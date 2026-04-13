@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flutter_2yaml — Flutter .dart ↔ Compact YAML for LLM/AI</title>
+<meta name="description" content="Convert Flutter .dart widget files into compact YAML optimized for LLM/AI token consumption. Bidirectional: Dart → YAML and YAML → Dart.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#FAFAF8;--bg-code:#F0EFEB;--bg-card:#FFFFFF;--bg-nav:#1A1A1A;
+--text:#1A1A1A;--text-secondary:#5A5A58;--text-muted:#8A8A88;--text-nav:#E8E5E0;
+--accent:#D4A27F;--accent-hover:#C4896A;
+--border:#E5E3DE;--border-light:#EDEBE6;
+--success:#4A8C6F;--info:#5B7FA5;--warning:#C4956A;
+--font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+--font-mono:'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){:root{
+--bg:#1A1A1A;--bg-code:#252525;--bg-card:#222222;
+--text:#E8E5E0;--text-secondary:#B0AEA8;--text-muted:#787874;--text-nav:#E8E5E0;
+--border:#333330;--border-light:#2A2A28;
+}}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none;transition:color .15s}
+a:hover{color:var(--accent-hover)}
+code{font-family:var(--font-mono);font-size:.875em;background:var(--bg-code);padding:2px 6px;border-radius:4px}
+pre{background:var(--bg-code);border:1px solid var(--border);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:13.5px;line-height:1.65}
+h1{font-size:38px;font-weight:700;letter-spacing:-.8px;line-height:1.15;color:var(--text)}
+h2{font-size:26px;font-weight:650;letter-spacing:-.4px;line-height:1.2;margin:48px 0 20px;color:var(--text)}
+h3{font-size:19px;font-weight:600;margin:28px 0 12px;color:var(--text)}
+p{color:var(--text-secondary);margin:12px 0}
+hr{border:none;border-top:1px solid var(--border-light);margin:48px 0}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+th{text-align:left;text-transform:uppercase;font-size:12px;letter-spacing:.5px;color:var(--text-muted);background:var(--bg-code);padding:10px 14px;border-bottom:2px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+tr:last-child td{border-bottom:none}
+nav{position:fixed;top:0;left:0;right:0;height:60px;background:var(--bg-nav);z-index:100;display:flex;align-items:center}
+.nav-inner{max-width:1200px;width:100%;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:600;font-size:16px;color:var(--text-nav);display:flex;align-items:center;gap:8px}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;list-style:none;gap:24px}
+.nav-links a{color:var(--text-muted);font-size:14px;font-weight:450;transition:color .15s}
+.nav-links a:hover{color:#fff}
+.layout{display:flex;max-width:1200px;margin:0 auto;padding:80px 32px 60px}
+.sidebar{width:220px;flex-shrink:0;position:sticky;top:80px;height:calc(100vh - 100px);overflow-y:auto;padding-right:32px;border-right:1px solid var(--border-light)}
+.sidebar h4{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin:24px 0 8px;font-weight:600}
+.sidebar h4:first-child{margin-top:0}
+.sidebar ul{list-style:none;margin:0 0 16px}
+.sidebar li{margin:2px 0}
+.sidebar a{display:block;padding:4px 12px;font-size:13.5px;color:var(--text-muted);border-left:2px solid transparent;transition:all .15s}
+.sidebar a:hover,.sidebar a.active{color:var(--accent);border-left-color:var(--accent)}
+.content{flex:1;min-width:0;max-width:780px;padding-left:48px}
+.hero{padding:32px 0 24px}
+.badge{display:inline-block;font-size:13px;font-weight:500;color:var(--accent);background:var(--bg-code);padding:6px 14px;border-radius:20px;margin-bottom:20px;font-family:var(--font-mono)}
+.hero h1{margin-bottom:16px}
+.hero p{font-size:18px;color:var(--text-secondary);max-width:600px}
+.hero-install{background:var(--bg-nav);color:var(--text-nav);font-family:var(--font-mono);font-size:14.5px;padding:14px 20px;border-radius:8px;margin-top:24px;user-select:all;display:inline-block}
+.hero-install span{color:var(--accent)}
+.section-number{color:var(--accent);font-weight:500;margin-right:4px}
+.callout{border-left:3px solid;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;font-size:14.5px}
+.callout strong{display:block;margin-bottom:4px;color:var(--text)}
+.callout.tip{border-color:var(--success);background:rgba(74,140,111,.08)}
+.callout.info{border-color:var(--info);background:rgba(91,127,165,.08)}
+.callout.warning{border-color:var(--warning);background:rgba(196,149,106,.08)}
+.options-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:20px 0}
+.option-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px}
+.option-card .label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:4px}
+.option-card .value{font-weight:600;font-size:15px;color:var(--text);margin-bottom:6px}
+.option-card .desc{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:20px 0}
+footer{text-align:center;padding:40px 32px;color:var(--text-muted);font-size:13px;border-top:1px solid var(--border-light)}
+footer a{color:var(--text-muted)}footer a:hover{color:var(--accent)}
+@media(max-width:900px){.sidebar{display:none}.content{padding-left:0}}
+@media(max-width:600px){.nav-links{display:none}h1{font-size:28px}h2{font-size:22px}.hero-install{font-size:13px}.two-col{grid-template-columns:1fr}.options-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+<div class="nav-inner">
+<a class="logo" href="#">flutter_<span>2yaml</span></a>
+<ul class="nav-links">
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#format">Format</a></li>
+<li><a href="#reverse">Reverse</a></li>
+<li><a href="https://pub.dev/packages/flutter_2yaml" target="_blank">pub.dev</a></li>
+<li><a href="https://github.com/msi-shamim/flutter_2yaml" target="_blank">GitHub</a></li>
+</ul>
+</div>
+</nav>
+
+<div class="layout">
+<aside class="sidebar">
+<h4>Getting Started</h4>
+<ul>
+<li><a href="#hero">Overview</a></li>
+<li><a href="#getting-started">Installation</a></li>
+<li><a href="#cli">CLI Reference</a></li>
+</ul>
+<h4>Format Specification</h4>
+<ul>
+<li><a href="#format">YAML Format</a></li>
+<li><a href="#pipe-syntax">Pipe Syntax</a></li>
+<li><a href="#shorthands">Shorthands</a></li>
+<li><a href="#widgets">Supported Widgets</a></li>
+</ul>
+<h4>Features</h4>
+<ul>
+<li><a href="#reverse">Reverse Conversion</a></li>
+<li><a href="#detection">Auto-Detection</a></li>
+<li><a href="#architecture">Architecture</a></li>
+</ul>
+<h4>Reference</h4>
+<ul>
+<li><a href="#all-options">All Options</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#api">Programmatic API</a></li>
+</ul>
+<h4>Links</h4>
+<ul>
+<li><a href="https://pub.dev/packages/flutter_2yaml" target="_blank">pub.dev</a></li>
+<li><a href="https://github.com/msi-shamim/flutter_2yaml" target="_blank">GitHub</a></li>
+<li><a href="https://github.com/msi-shamim/flutter_2yaml/wiki" target="_blank">Wiki</a></li>
+</ul>
+</aside>
+
+<main class="content">
+
+<div class="hero" id="hero">
+<div class="badge">v0.4.0 · 65 tests · pub.dev published</div>
+<h1>Flutter .dart to compact YAML<br>for LLM/AI agents.</h1>
+<p>Convert Flutter widget files into token-efficient YAML with pipe syntax, CSS-like shorthands, and arrow callbacks — saving 50-70% tokens. Bidirectional: Dart ↔ YAML.</p>
+<div class="hero-install"><span>dart pub global activate</span> flutter_2yaml</div>
+</div>
+
+<hr>
+
+<!-- 01. Why -->
+<section id="why">
+<h2><span class="section-number">01.</span> Why flutter_2yaml?</h2>
+<p>When feeding Flutter code to AI models as context, full <code>.dart</code> files waste tokens on boilerplate — <code>import</code> statements, <code>@override</code>, <code>super.key</code>, <code>BuildContext context</code>, <code>const</code> keywords, semicolons, curly braces, class declarations, and <code>createState()</code>. None of these carry meaningful UI information.</p>
+<p><strong>flutter_2yaml</strong> strips all boilerplate and produces structured YAML using an aggressive shorthand system — pipe syntax for Text/Image/Icon, CSS-like abbreviations for properties, and arrow notation for callbacks.</p>
+
+<div class="two-col">
+<div>
+<h3>Before — Dart (45 lines)</h3>
+<pre><code>class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+  @override
+  State&lt;SplashScreen&gt; createState()
+    =&gt; _SplashScreenState();
+}
+
+class _SplashScreenState
+    extends State&lt;SplashScreen&gt; {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(
+      const Duration(seconds: 3));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment:
+            MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/logo.png',
+              width: 200, height: 200),
+            const SizedBox(height: 20),
+            if (_isLoading)
+              const CircularProgressIndicator(
+                color: Colors.blue),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+</div>
+<div>
+<h3>After — YAML (14 lines)</h3>
+<pre><code>page: SplashScreen
+type: StatefulWidget
+state: [_isLoading: bool = true]
+lifecycle:
+  initState: [Future.delayed(3s)]
+build:
+  Scaffold:
+    bg: white
+    body:
+      Center:
+        child:
+          Column(center):
+            children:
+              - Image.asset: assets/logo.png
+                  | 200x200
+              - SizedBox: { h: 20 }
+              - if _isLoading:
+                  CircularProgressIndicator:
+                    { color: blue }</code></pre>
+<div class="callout tip">
+<strong>50-70% token reduction</strong>
+The same widget structure in dramatically fewer tokens — every shorthand is designed to preserve full semantic understanding for LLMs.
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<hr>
+
+<!-- 02. Getting Started -->
+<section id="getting-started">
+<h2><span class="section-number">02.</span> Getting Started</h2>
+
+<h3>Prerequisites</h3>
+<p>Dart SDK 3.8.0 or later. A Flutter project with <code>.dart</code> widget files.</p>
+
+<h3>Install</h3>
+<pre><code>dart pub global activate flutter_2yaml</code></pre>
+
+<h3>Convert a file</h3>
+<pre><code>flutter_2yaml lib/screens/splash_screen.dart</code></pre>
+<p>Output: <code>splash_screen.yaml</code> in the same directory.</p>
+
+<h3>Convert a directory</h3>
+<pre><code>flutter_2yaml lib/screens/ --recursive</code></pre>
+
+<h3>Watch mode</h3>
+<pre><code>flutter_2yaml lib/screens/ --watch</code></pre>
+<p>Auto-regenerates YAML whenever a <code>.dart</code> file is saved.</p>
+
+<div class="callout info">
+<strong>Non-widget files are skipped</strong>
+Services, repositories, models, and other non-widget classes are automatically ignored — only StatelessWidget and StatefulWidget (and framework variants) are converted.
+</div>
+</section>
+
+<hr>
+
+<!-- 03. CLI Reference -->
+<section id="cli">
+<h2><span class="section-number">03.</span> CLI Reference</h2>
+
+<h3>Forward: Dart → YAML</h3>
+<pre><code>flutter_2yaml &lt;path&gt; [options]</code></pre>
+
+<table>
+<tr><th>Flag</th><th>Short</th><th>Values</th><th>Default</th></tr>
+<tr><td><code>--level</code></td><td><code>-l</code></td><td>minimal, standard, full</td><td>standard</td></tr>
+<tr><td><code>--output</code></td><td><code>-o</code></td><td>directory path</td><td>same as source</td></tr>
+<tr><td><code>--watch</code></td><td><code>-w</code></td><td>—</td><td>off</td></tr>
+<tr><td><code>--recursive</code></td><td><code>-r</code></td><td>—</td><td>off</td></tr>
+</table>
+
+<h3>Reverse: YAML → Dart</h3>
+<pre><code>flutter_2yaml reverse &lt;path&gt; [options]</code></pre>
+
+<table>
+<tr><th>Flag</th><th>Short</th><th>Values</th><th>Default</th></tr>
+<tr><td><code>--output</code></td><td><code>-o</code></td><td>directory path</td><td>same as source</td></tr>
+<tr><td><code>--recursive</code></td><td><code>-r</code></td><td>—</td><td>off</td></tr>
+</table>
+
+<h3>Verbosity Levels</h3>
+<div class="options-grid">
+<div class="option-card">
+<div class="label">MINIMAL</div>
+<div class="value">Widget tree only</div>
+<div class="desc">Just the build section with all shorthands applied. Best for quick UI structure overview.</div>
+</div>
+<div class="option-card">
+<div class="label">STANDARD</div>
+<div class="value">+ State &amp; Lifecycle</div>
+<div class="desc">Adds state variables and lifecycle methods. Default level — full widget understanding.</div>
+</div>
+<div class="option-card">
+<div class="label">FULL</div>
+<div class="value">+ Imports &amp; Constructor</div>
+<div class="desc">Everything: imports, constructor params, all methods, mixins. Complete file representation.</div>
+</div>
+</div>
+</section>
+
+<hr>
+
+<!-- 04. YAML Format -->
+<section id="format">
+<h2><span class="section-number">04.</span> YAML Format</h2>
+
+<h3>Header</h3>
+<pre><code>page: SplashScreen                    # 'page' if has Scaffold
+widget: WelcomeCard                   # 'widget' for components
+type: StatefulWidget                  # StatefulWidget or StatelessWidget
+controller: HomeController(GetX)      # Auto-detected state management
+state: [_isLoading: bool = true]      # Compact state variables</code></pre>
+
+<h3>Lifecycle</h3>
+<pre><code>lifecycle:
+  initState: [Future.delayed(3s)]
+  dispose: []</code></pre>
+
+<h3>Named Children (Scaffold)</h3>
+<pre><code>Scaffold:
+  bg: white
+  appBar:
+    AppBar:
+      title: Text: "Home" | 20 | bold
+  drawer:
+    Drawer: { ... }
+  body:
+    Center: { ... }
+  floatingActionButton:
+    FloatingActionButton:
+      onPressed → add()
+      child: Icon: add
+  bottomNavigationBar:
+    BottomNavigationBar: { ... }</code></pre>
+
+<h3>Conditional &amp; Collection Elements</h3>
+<pre><code>children:
+  - if _isLoading: CircularProgressIndicator: {}
+  - ...items                              # Spread
+  - for(item in products): Card: {}       # For-in</code></pre>
+</section>
+
+<hr>
+
+<!-- 05. Pipe Syntax -->
+<section id="pipe-syntax">
+<h2><span class="section-number">05.</span> Pipe Syntax</h2>
+<p>Compress common widgets into a single line using <code>|</code> separators.</p>
+
+<h3>Text</h3>
+<p>Order: <code>content | fontSize | fontWeight | color</code></p>
+<table>
+<tr><th>YAML</th><th>Dart Equivalent</th></tr>
+<tr><td><code>Text: "Hello"</code></td><td><code>const Text('Hello')</code></td></tr>
+<tr><td><code>Text: "Hello" | 20</code></td><td><code>Text('Hello', style: TextStyle(fontSize: 20))</code></td></tr>
+<tr><td><code>Text: "Hello" | 20 | bold | white</code></td><td><code>Text('Hello', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white))</code></td></tr>
+<tr><td><code>Text: title | 24</code></td><td><code>Text(title, style: TextStyle(fontSize: 24))</code></td></tr>
+</table>
+
+<h3>Image</h3>
+<table>
+<tr><th>YAML</th><th>Dart Equivalent</th></tr>
+<tr><td><code>Image.asset: logo.png | 200x200</code></td><td><code>Image.asset('logo.png', width: 200, height: 200)</code></td></tr>
+<tr><td><code>Image.asset: banner.png | fit: cover</code></td><td><code>Image.asset('banner.png', fit: BoxFit.cover)</code></td></tr>
+</table>
+
+<h3>Icon &amp; SizedBox</h3>
+<table>
+<tr><th>YAML</th><th>Dart Equivalent</th></tr>
+<tr><td><code>Icon: menu</code></td><td><code>const Icon(Icons.menu)</code></td></tr>
+<tr><td><code>SizedBox: { h: 20 }</code></td><td><code>const SizedBox(height: 20)</code></td></tr>
+</table>
+</section>
+
+<hr>
+
+<!-- 06. Shorthands -->
+<section id="shorthands">
+<h2><span class="section-number">06.</span> CSS-Like Shorthands</h2>
+
+<h3>Properties</h3>
+<table>
+<tr><th>YAML</th><th>Flutter</th><th>YAML</th><th>Flutter</th></tr>
+<tr><td><code>bg</code></td><td>backgroundColor</td><td><code>br</code></td><td>BorderRadius.circular(N)</td></tr>
+<tr><td><code>h</code></td><td>height</td><td><code>w</code></td><td>width</td></tr>
+<tr><td><code>t</code></td><td>top</td><td><code>l</code></td><td>left</td></tr>
+<tr><td><code>r</code></td><td>right</td><td><code>b</code></td><td>bottom</td></tr>
+<tr><td><code>gap</code></td><td>spacing (Wrap)</td><td><code>runGap</code></td><td>runSpacing (Wrap)</td></tr>
+<tr><td><code>full</code></td><td>double.infinity</td><td><code>200x200</code></td><td>width: 200, height: 200</td></tr>
+</table>
+
+<h3>Spacing</h3>
+<table>
+<tr><th>YAML</th><th>Flutter</th></tr>
+<tr><td><code>p: 16</code></td><td><code>padding: EdgeInsets.all(16)</code></td></tr>
+<tr><td><code>px: 12</code></td><td><code>padding: EdgeInsets.symmetric(horizontal: 12)</code></td></tr>
+<tr><td><code>py: 8</code></td><td><code>padding: EdgeInsets.symmetric(vertical: 8)</code></td></tr>
+<tr><td><code>p: {l: 8, t: 12}</code></td><td><code>padding: EdgeInsets.only(left: 8, top: 12)</code></td></tr>
+</table>
+
+<h3>BoxDecoration</h3>
+<table>
+<tr><th>YAML</th><th>Flutter</th></tr>
+<tr><td><code>shadow: {c: black12, blur: 6}</code></td><td><code>boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)]</code></td></tr>
+<tr><td><code>bg: gradient(blue, purple)</code></td><td><code>gradient: LinearGradient(colors: [Colors.blue, Colors.purple])</code></td></tr>
+<tr><td><code>border: {c: black, w: 2}</code></td><td><code>border: Border.all(color: Colors.black, width: 2)</code></td></tr>
+</table>
+
+<h3>Alignment (Parenthetical)</h3>
+<table>
+<tr><th>YAML</th><th>Flutter</th></tr>
+<tr><td><code>Column(center)</code></td><td><code>mainAxisAlignment: MainAxisAlignment.center</code></td></tr>
+<tr><td><code>Column(start)</code></td><td><code>crossAxisAlignment: CrossAxisAlignment.start</code></td></tr>
+<tr><td><code>Row(spaceBetween)</code></td><td><code>mainAxisAlignment: MainAxisAlignment.spaceBetween</code></td></tr>
+</table>
+
+<h3>Arrow Callbacks</h3>
+<table>
+<tr><th>YAML</th><th>Flutter</th></tr>
+<tr><td><code>onTap → goSearch()</code></td><td><code>onTap: () =&gt; goSearch()</code></td></tr>
+<tr><td><code>onPressed → handleSubmit</code></td><td><code>onPressed: handleSubmit</code></td></tr>
+</table>
+
+<h3>Colors</h3>
+<p><code>white</code>, <code>black</code>, <code>red</code>, <code>blue</code>, <code>green</code>, <code>yellow</code>, <code>orange</code>, <code>purple</code>, <code>pink</code>, <code>grey</code>, <code>teal</code>, <code>cyan</code>, <code>amber</code>, <code>indigo</code>, <code>brown</code>, <code>transparent</code> + shade variants (<code>black12</code>–<code>black87</code>, <code>grey100</code>–<code>grey900</code>) + hex <code>#RRGGBB</code></p>
+
+<h3>Theme &amp; MediaQuery</h3>
+<table>
+<tr><th>YAML</th><th>Flutter</th></tr>
+<tr><td><code>theme.headline</code></td><td><code>Theme.of(context).textTheme.headline</code></td></tr>
+<tr><td><code>screen.w</code></td><td><code>MediaQuery.of(context).size.width</code></td></tr>
+<tr><td><code>screen.h</code></td><td><code>MediaQuery.of(context).size.height</code></td></tr>
+</table>
+</section>
+
+<hr>
+
+<!-- 07. Supported Widgets -->
+<section id="widgets">
+<h2><span class="section-number">07.</span> Supported Widgets</h2>
+
+<h3>Widget Base Classes</h3>
+<table>
+<tr><th>Base Class</th><th>Framework</th><th>Detected As</th></tr>
+<tr><td><code>StatelessWidget</code></td><td>Flutter</td><td>StatelessWidget</td></tr>
+<tr><td><code>StatefulWidget</code></td><td>Flutter</td><td>StatefulWidget</td></tr>
+<tr><td><code>ConsumerWidget</code></td><td>Riverpod</td><td>StatelessWidget</td></tr>
+<tr><td><code>ConsumerStatefulWidget</code></td><td>Riverpod</td><td>StatefulWidget</td></tr>
+<tr><td><code>GetView&lt;T&gt;</code></td><td>GetX</td><td>StatelessWidget</td></tr>
+</table>
+
+<h3>Named Child Slots</h3>
+<p><code>child</code>, <code>body</code>, <code>appBar</code>, <code>drawer</code>, <code>endDrawer</code>, <code>floatingActionButton</code>, <code>bottomNavigationBar</code>, <code>bottomSheet</code>, <code>leading</code>, <code>title</code>, <code>icon</code>, <code>label</code>, <code>header</code>, <code>footer</code>, <code>placeholder</code>, <code>background</code>, <code>secondaryBackground</code>, <code>home</code></p>
+
+<h3>Children List Slots</h3>
+<p><code>children</code>, <code>actions</code>, <code>tabs</code>, <code>slivers</code>, <code>items</code>, <code>destinations</code></p>
+
+<h3>Recognized Callbacks</h3>
+<p><code>onTap</code>, <code>onPressed</code>, <code>onLongPress</code>, <code>onDoubleTap</code>, <code>onChanged</code>, <code>onSubmitted</code>, <code>onEditingComplete</code>, <code>onSaved</code>, <code>onRefresh</code>, <code>onDismissed</code>, <code>onSelected</code>, <code>onExpansionChanged</code>, <code>onReorder</code>, <code>onPageChanged</code>, <code>validator</code></p>
+</section>
+
+<hr>
+
+<!-- 08. Reverse Conversion -->
+<section id="reverse">
+<h2><span class="section-number">08.</span> Reverse Conversion</h2>
+<p>Convert compact YAML back to idiomatic Flutter Dart code.</p>
+
+<pre><code>flutter_2yaml reverse splash_screen.yaml
+flutter_2yaml reverse yaml_output/ --recursive
+flutter_2yaml reverse yaml_output/ --output lib/screens/</code></pre>
+
+<h3>What Gets Generated</h3>
+<ul style="color:var(--text-secondary);padding-left:20px">
+<li><code>import 'package:flutter/material.dart';</code> always included</li>
+<li>State management imports auto-added when <code>controller:</code> present</li>
+<li><code>const</code> constructors with <code>super.key</code></li>
+<li><code>@override</code> annotations on lifecycle and build methods</li>
+<li><code>super.initState()</code> / <code>super.dispose()</code> in lifecycle</li>
+<li>All shorthands expanded: <code>bg</code> → <code>backgroundColor</code>, <code>p</code> → <code>EdgeInsets.all</code>, etc.</li>
+</ul>
+
+<div class="callout warning">
+<strong>Round-trip limitations</strong>
+Comments, complex callback bodies, and exact <code>const</code> placement may differ from the original. The structure and logic are preserved — formatting details may vary.
+</div>
+</section>
+
+<hr>
+
+<!-- 09. Auto-Detection -->
+<section id="detection">
+<h2><span class="section-number">09.</span> Auto-Detection</h2>
+
+<h3>State Management</h3>
+<table>
+<tr><th>Import Pattern</th><th>Detected As</th><th>YAML Output</th></tr>
+<tr><td><code>package:get/</code></td><td>GetX</td><td><code>controller: HomeController(GetX)</code></td></tr>
+<tr><td><code>package:flutter_riverpod/</code></td><td>Riverpod</td><td><code>stateManagement: Riverpod</code></td></tr>
+<tr><td><code>package:flutter_bloc/</code></td><td>Bloc</td><td><code>stateManagement: Bloc</code></td></tr>
+<tr><td><code>package:provider/</code></td><td>Provider</td><td><code>stateManagement: Provider</code></td></tr>
+<tr><td><code>package:flutter_mobx/</code></td><td>MobX</td><td><code>stateManagement: MobX</code></td></tr>
+</table>
+
+<h3>Page vs Widget</h3>
+<p>Widgets containing <code>Scaffold</code>, <code>CupertinoPageScaffold</code>, <code>MaterialApp</code>, or <code>CupertinoApp</code> are classified as <code>page:</code>. All others use <code>widget:</code>.</p>
+
+<h3>Icon &amp; Color</h3>
+<p><code>Icons.menu</code> → <code>menu</code>, <code>Colors.blue</code> → <code>blue</code>, <code>Color(0xFF123456)</code> → <code>#123456</code>, <code>double.infinity</code> → <code>full</code></p>
+</section>
+
+<hr>
+
+<!-- 10. Architecture -->
+<section id="architecture">
+<h2><span class="section-number">10.</span> Architecture</h2>
+<pre><code>Forward:  .dart → DartFileAnalyzer → DartFileModel → YamlGenerator → .yaml
+Reverse:  .yaml → YamlParser       → DartFileModel → DartGenerator → .dart</code></pre>
+
+<pre><code>lib/src/
+├── analyzer/                    # Forward: Dart AST → Model
+│   ├── dart_file_analyzer.dart  # Main analyzer + state mgmt detection
+│   ├── widget_visitor.dart      # RecursiveAstVisitor for widget tree
+│   └── state_visitor.dart       # State variables, lifecycle methods
+├── parser/                      # Reverse: YAML text → Model
+│   ├── yaml_parser.dart         # Full YAML → DartFileModel
+│   ├── widget_parser.dart       # Indentation-based tree parser
+│   ├── pipe_parser.dart         # Text, Image, Icon pipe parsing
+│   └── reverse_shorthand_map.dart
+├── generator/                   # Output generation
+│   ├── yaml_generator.dart      # Model → compact YAML
+│   ├── dart_generator.dart      # Model → idiomatic Dart
+│   └── shorthand_map.dart       # Forward shorthand lookups
+├── models/                      # Shared data structures
+│   ├── dart_file_model.dart     # Complete file representation
+│   ├── widget_node.dart         # Widget tree node
+│   └── state_model.dart         # State, lifecycle, methods
+├── cli/
+│   ├── command_runner.dart      # CLI argument parsing
+│   └── watcher.dart             # File watch mode
+├── converter.dart               # Forward file I/O
+└── reverse_converter.dart       # Reverse file I/O</code></pre>
+</section>
+
+<hr>
+
+<!-- 11. All Options -->
+<section id="all-options">
+<h2><span class="section-number">11.</span> All Options Reference</h2>
+<table>
+<tr><th>Flag</th><th>Short</th><th>Values</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>--level</code></td><td><code>-l</code></td><td>minimal, standard, full</td><td>standard</td><td>YAML verbosity level</td></tr>
+<tr><td><code>--output</code></td><td><code>-o</code></td><td>directory path</td><td>same dir</td><td>Output directory</td></tr>
+<tr><td><code>--watch</code></td><td><code>-w</code></td><td>—</td><td>off</td><td>Auto-regenerate on changes</td></tr>
+<tr><td><code>--recursive</code></td><td><code>-r</code></td><td>—</td><td>off</td><td>Scan subdirectories</td></tr>
+<tr><td><code>--help</code></td><td><code>-h</code></td><td>—</td><td>—</td><td>Show usage</td></tr>
+<tr><td><code>--version</code></td><td><code>-v</code></td><td>—</td><td>—</td><td>Show version</td></tr>
+</table>
+</section>
+
+<hr>
+
+<!-- 12. Examples -->
+<section id="examples">
+<h2><span class="section-number">12.</span> Example Combinations</h2>
+
+<h3>Quick scan of all screens</h3>
+<pre><code>flutter_2yaml lib/screens/ --recursive --level minimal</code></pre>
+
+<h3>Full context for AI agent</h3>
+<pre><code>flutter_2yaml lib/ --recursive --level standard --output .ai/context/</code></pre>
+
+<h3>Watch during development</h3>
+<pre><code>flutter_2yaml lib/screens/ --watch --level standard</code></pre>
+
+<h3>Round-trip: edit YAML, regenerate Dart</h3>
+<pre><code># Generate YAML
+flutter_2yaml lib/screens/home_screen.dart --output yaml/
+
+# Edit yaml/home_screen.yaml with AI or manually...
+
+# Regenerate Dart
+flutter_2yaml reverse yaml/home_screen.yaml --output lib/screens/</code></pre>
+</section>
+
+<hr>
+
+<!-- 13. Programmatic API -->
+<section id="api">
+<h2><span class="section-number">13.</span> Programmatic API</h2>
+
+<pre><code>import 'package:flutter_2yaml/flutter_2yaml.dart';
+
+// Forward: Dart → YAML
+final analyzer = DartFileAnalyzer();
+final model = analyzer.analyze(dartSource, 'my_widget.dart');
+final yamlGenerator = YamlGenerator();
+final yaml = yamlGenerator.generate(model!, VerbosityLevel.standard);
+
+// Reverse: YAML → Dart
+final yamlParser = YamlParser();
+final reverseModel = yamlParser.parse(yamlSource, 'my_widget.yaml');
+final dartGenerator = DartGenerator();
+final dartCode = dartGenerator.generate(reverseModel);
+
+// File-level conversion
+final converter = Converter();
+converter.convertFile('lib/screens/home.dart');
+converter.convertDirectory('lib/screens/', recursive: true);
+
+final reverseConverter = ReverseConverter();
+reverseConverter.reverseFile('home.yaml');</code></pre>
+</section>
+
+<hr>
+
+<section id="credits" style="text-align:center;padding:32px 0">
+<p style="color:var(--text-muted);font-size:14px">
+Built by <a href="https://github.com/msi-shamim">MSI Shamim</a> ·
+<a href="https://pub.dev/packages/flutter_2yaml">pub.dev</a> ·
+<a href="https://github.com/msi-shamim/flutter_2yaml">GitHub</a> ·
+<a href="https://github.com/msi-shamim/flutter_2yaml/wiki">Wiki</a> ·
+MIT License
+</p>
+</section>
+
+</main>
+</div>
+
+<footer>
+<p>flutter_2yaml v0.4.0 · Made with Dart · MIT License · <a href="https://github.com/msi-shamim/flutter_2yaml">GitHub</a></p>
+</footer>
+
+</body>
+</html>
