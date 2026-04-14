@@ -324,6 +324,10 @@ class DartGenerator {
       }
     }
 
+    // Collect decoration properties for Container wrapping.
+    final isContainer = node.name == 'Container';
+    final decorationArgs = <String>[];
+
     // Properties — expand shorthands.
     for (final entry in node.properties.entries) {
       if (entry.key == 'value') continue;
@@ -339,9 +343,23 @@ class DartGenerator {
         continue;
       }
 
+      // For Container: collect bg, br, border, shadow, gradient into BoxDecoration.
+      if (isContainer && _isDecorationProperty(entry.key)) {
+        final decorArg = _expandDecorationProperty(entry.key, entry.value);
+        if (decorArg != null) {
+          decorationArgs.add(decorArg);
+        }
+        continue;
+      }
+
       final expandedKey = expandProperty(entry.key);
       final expandedValue = _expandPropertyValue(expandedKey, entry.value);
       args.add('$expandedKey: $expandedValue');
+    }
+
+    // Emit collected decoration properties as a single BoxDecoration.
+    if (decorationArgs.isNotEmpty) {
+      args.add('decoration: BoxDecoration(${decorationArgs.join(', ')})');
     }
 
     // Callbacks with arrow notation.
@@ -441,7 +459,7 @@ class DartGenerator {
     }
 
     if (propertyName == 'borderRadius') {
-      return 'BorderRadius.circular($value)';
+      return _expandBorderRadius(value);
     }
 
     if (value == 'full') return 'double.infinity';
@@ -524,30 +542,62 @@ class DartGenerator {
   }
 
   /// Expands shadow shorthand to BoxShadow.
+  /// Handles: `{c: black, blur: 3, offset: Offset(0, 1)}`
+  /// Must respect commas inside nested parens like `Offset(0, 1)`.
   String _expandShadow(String value) {
     if (value.startsWith('{') && value.endsWith('}')) {
       final content = value.substring(1, value.length - 1).trim();
-      final parts = content.split(',').map((s) => s.trim()).toList();
-      final args = parts
-          .map((p) {
-            final kv = p.split(':').map((s) => s.trim()).toList();
-            final key = kv[0];
-            final val = kv[1];
-            switch (key) {
-              case 'c':
-                return 'color: ${expandColor(val)}';
-              case 'blur':
-                return 'blurRadius: $val';
-              case 'spread':
-                return 'spreadRadius: $val';
-              default:
-                return '$key: $val';
-            }
-          })
-          .join(', ');
-      return '[BoxShadow($args)]';
+      final parts = _splitRespectingParens(content);
+      final args = <String>[];
+      for (final part in parts) {
+        final colonIdx = part.indexOf(':');
+        if (colonIdx < 0) continue;
+        final key = part.substring(0, colonIdx).trim();
+        final val = part.substring(colonIdx + 1).trim();
+        switch (key) {
+          case 'c':
+            args.add('color: ${expandColor(val)}');
+            break;
+          case 'blur':
+            args.add('blurRadius: $val');
+            break;
+          case 'spread':
+            args.add('spreadRadius: $val');
+            break;
+          case 'offset':
+            args.add('offset: $val');
+            break;
+          default:
+            args.add('$key: $val');
+        }
+      }
+      return '[BoxShadow(${args.join(', ')})]';
     }
     return value;
+  }
+
+  /// Splits a string by commas while respecting nested parens and braces.
+  List<String> _splitRespectingParens(String input) {
+    final results = <String>[];
+    var depth = 0;
+    var current = StringBuffer();
+    for (var i = 0; i < input.length; i++) {
+      final char = input[i];
+      if (char == '(' || char == '{') {
+        depth++;
+        current.write(char);
+      } else if (char == ')' || char == '}') {
+        depth--;
+        current.write(char);
+      } else if (char == ',' && depth == 0) {
+        results.add(current.toString().trim());
+        current = StringBuffer();
+      } else {
+        current.write(char);
+      }
+    }
+    if (current.isNotEmpty) results.add(current.toString().trim());
+    return results;
   }
 
   /// Expands a lifecycle action summary to Dart code.
@@ -588,5 +638,94 @@ class DartGenerator {
   String _inferChildKey(WidgetNode parent) {
     if (parent.name == 'Scaffold') return 'body';
     return 'child';
+  }
+
+  /// Properties that should be collected into BoxDecoration for Container.
+  bool _isDecorationProperty(String key) {
+    return const {'bg', 'br', 'border', 'shadow', 'gradient'}.contains(key);
+  }
+
+  /// Expands a decoration property into a named argument for BoxDecoration.
+  String? _expandDecorationProperty(String key, String value) {
+    switch (key) {
+      case 'bg':
+        return 'color: ${expandColor(value)}';
+      case 'br':
+        return 'borderRadius: ${_expandBorderRadius(value)}';
+      case 'border':
+        return 'border: ${_expandBorder(value)}';
+      case 'shadow':
+        return 'boxShadow: ${_expandShadow(value)}';
+      case 'gradient':
+        return 'gradient: ${_expandGradient(value)}';
+      default:
+        return null;
+    }
+  }
+
+  /// Expands border radius — handles both uniform and per-corner syntax.
+  /// Uniform: `12` → `BorderRadius.circular(12)`
+  /// Per-corner: `{tl: 24, tr: 24, bl: 0, br: 0}` → `BorderRadius.only(...)`
+  String _expandBorderRadius(String value) {
+    if (value.startsWith('{') && value.endsWith('}')) {
+      final content = value.substring(1, value.length - 1).trim();
+      final parts = content.split(',').map((s) => s.trim()).toList();
+      final namedArgs = <String>[];
+      for (final part in parts) {
+        final kv = part.split(':').map((s) => s.trim()).toList();
+        if (kv.length != 2) continue;
+        final radiusValue = kv[1];
+        if (radiusValue == '0') continue; // Skip zero radii for cleaner output
+        final cornerName = _expandBorderRadiusKey(kv[0]);
+        namedArgs.add('$cornerName: Radius.circular($radiusValue)');
+      }
+      if (namedArgs.isEmpty) return 'BorderRadius.zero';
+      return 'BorderRadius.only(${namedArgs.join(', ')})';
+    }
+    return 'BorderRadius.circular($value)';
+  }
+
+  /// Expands border radius key abbreviations.
+  String _expandBorderRadiusKey(String key) {
+    switch (key) {
+      case 'tl':
+        return 'topLeft';
+      case 'tr':
+        return 'topRight';
+      case 'bl':
+        return 'bottomLeft';
+      case 'br':
+        return 'bottomRight';
+      default:
+        return key;
+    }
+  }
+
+  /// Expands border shorthand to Border.
+  /// Formats: `{c: #121212}`, `{c: grey200, w: 1}`, `1 solid grey200`
+  String _expandBorder(String value) {
+    if (value.startsWith('{') && value.endsWith('}')) {
+      final content = value.substring(1, value.length - 1).trim();
+      final parts = content.split(',').map((s) => s.trim()).toList();
+      String? color;
+      String? width;
+      for (final part in parts) {
+        final kv = part.split(':').map((s) => s.trim()).toList();
+        if (kv.length != 2) continue;
+        switch (kv[0]) {
+          case 'c':
+            color = expandColor(kv[1]);
+            break;
+          case 'w':
+            width = kv[1];
+            break;
+        }
+      }
+      final args = <String>[];
+      if (color != null) args.add('color: $color');
+      if (width != null) args.add('width: $width');
+      return 'Border.all(${args.join(', ')})';
+    }
+    return value;
   }
 }

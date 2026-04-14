@@ -1,3 +1,11 @@
+## 0.4.1
+
+- **Reverse codegen: Container BoxDecoration** — `bg`, `br`, `border`, `shadow`, `gradient` properties on Container are now collected into a single `decoration: BoxDecoration(...)` instead of emitting raw properties
+- **Per-corner border radius** — `br: {tl: 24, tr: 24, bl: 0, br: 0}` now generates `BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24))` instead of invalid `BorderRadius.circular({...})`
+- **Border shorthand expansion** — `border: {c: #121212, w: 1}` now generates `Border.all(color: Color(0xFF121212), width: 1)`
+- **Shadow offset fix** — `shadow: {c: black, blur: 3, offset: Offset(0, 1)}` no longer crashes on nested commas inside `Offset()`; now uses paren-aware splitting
+- **figma2flutter compatibility** — reverse codegen validated against real Figma plugin YAML output (full pages with Stack, Positioned, per-corner radii, shadows, borders)
+
 ## 0.4.0
 
 - **Forward conversion hardened** — full Scaffold support with named children
