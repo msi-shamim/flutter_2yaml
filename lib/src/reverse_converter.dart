@@ -24,6 +24,16 @@ class ReverseConverter {
 
     final source = file.readAsStringSync();
     final fileName = p.basename(inputPath);
+
+    // Warn about component reference tags that require MCP for full resolution
+    if (source.contains('<') && RegExp(r'<[A-Za-z]').hasMatch(source)) {
+      stderr.writeln(
+        'Warning: $fileName contains component reference tags (<ComponentName:Variant>). '
+        'Full component resolution requires the figma2flutter MCP server. '
+        'Components will be output as Text placeholders.',
+      );
+    }
+
     final model = _parser.parse(source, fileName);
     final dartCode = _generator.generate(model);
 

@@ -1,3 +1,13 @@
+## 0.5.0
+
+- **Component reference tags** — new `<ComponentName:Key=Value>` syntax for referencing figma2flutter plugin components in YAML
+- Component tags are parsed by the reverse converter and output as `const Text('ComponentName (Variant)')` placeholder widgets
+- Warning (not error) printed when component tags are detected: "Full component resolution requires the figma2flutter MCP server"
+- `_componentRef` internal metadata stored on placeholder nodes for future MCP integration
+- Arrow callbacks in `# →` comments no longer misinterpreted as widget callbacks
+- Internal `_` prefixed properties skipped by the Dart generator
+- Supports all variant patterns: `<B-NavBar:Status=Home, Mode=Light>`, `<Tab Menu:Type=Active, Style=Solid>`, `<WOWR Card List:Type=WO>`, `<ComponentName>` (no variants)
+
 ## 0.4.1
 
 - **Reverse codegen: Container BoxDecoration** — `bg`, `br`, `border`, `shadow`, `gradient` properties on Container are now collected into a single `decoration: BoxDecoration(...)` instead of emitting raw properties

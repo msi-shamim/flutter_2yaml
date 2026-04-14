@@ -331,6 +331,8 @@ class DartGenerator {
     // Properties — expand shorthands.
     for (final entry in node.properties.entries) {
       if (entry.key == 'value') continue;
+      // Skip internal metadata keys (prefixed with _)
+      if (entry.key.startsWith('_')) continue;
 
       // Handle spacing shorthands (p, px, py, m, mx, my).
       final spacingResult = _tryExpandSpacingShorthand(
